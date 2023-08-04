@@ -1,10 +1,16 @@
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { AgGridReact } from "ag-grid-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import axios from "axios";
-// import { Grid } from "ag-grid-community";
-import { Button, Grid } from "@mui/material";
+import Button from "@mui/material/Button";
+import Grid from "@mui/material/Grid";
 
 const createNewRow = () => {
   return {
@@ -17,8 +23,8 @@ const createNewRow = () => {
 
 export function Table() {
   const gridRef = useRef();
-  const [tableData, setTableData] = useState(null);
-  const url = `http://localhost:4000/data`;
+  const [tableData, setTableData] = useState([]);
+  const url = `http://localhost:4000/`;
 
   useEffect(() => {
     getData();
@@ -26,22 +32,30 @@ export function Table() {
 
   const removeSelected = useCallback(() => {
     const selectedData = gridRef.current.api.getSelectedRows();
-    // setTableData(tableData?.filter((row) => row !== selectedData));
-    const res = gridRef.current.api.applyTransaction({ remove: selectedData });
-    console.log(selectedData);
-    console.log("removed", res);
-  }, []);
+    try {
+      const newData = [...tableData];
+      setTableData(newData.filter((row) => row !== selectedData[0]));
+    } catch (error) {
+      console.error("Error while removing rows:", error);
+    }
+  }, [tableData]);
 
-  const addRow = useCallback((idx = undefined) => {
-    const res = gridRef.current.api.applyTransaction({
-      add: [createNewRow()],
-      addIndex: idx,
-    });
-    console.log("added", res);
-  }, []);
+  const addRow = useCallback(
+    (idx = undefined) => {
+      const newRow = createNewRow();
+      const newData = [...tableData];
+      if (idx !== undefined) {
+        newData.splice(idx, 0, newRow);
+      } else {
+        newData.push(newRow);
+      }
+      setTableData(newData);
+    },
+    [tableData]
+  );
 
   const getData = () => {
-    axios.get(url).then((res) => {
+    axios.get(url + `data`).then((res) => {
       const data2 = res.data.map((row) => {
         const startParts = row.start.split("/");
         const endParts = row.end.split("/");
@@ -82,11 +96,12 @@ export function Table() {
     resizable: true,
     editable: true,
   };
+
   const columnDefs = [
     { headerName: "Start", field: "start" },
     { headerName: "End", field: "end" },
-    { headerName: "Ammount", field: "ammount" },
-    { headerName: "Commet", field: "comment" },
+    { headerName: "Amount", field: "ammount" },
+    { headerName: "Comment", field: "comment" },
   ];
 
   const onGridReady = (params) => {};
@@ -98,8 +113,10 @@ export function Table() {
   };
 
   const handleSubmit = () => {
-    console.log(tableData);
+    const data = JSON.stringify(tableData);
+    axios.post(url + `saved`, data).then(console.log("submiteed", data));
   };
+
   return (
     <div style={style}>
       <ButtoGrid removeSelected={removeSelected} addRow={addRow} />
@@ -114,11 +131,10 @@ export function Table() {
           defaultColDef={defaultColDef}
           onGridReady={onGridReady}
           dataTypeDefinitions={dataTypeDefinitions}
-          rowSelection={"multiple"}
+          rowSelection={"single"}
           animateRows={true}
         />
       </div>
-
       <Grid align="right" padding="1rem">
         <Button variant="contained" color="primary" onClick={handleSubmit}>
           Submit
@@ -139,6 +155,7 @@ function ButtoGrid({ removeSelected, addRow }) {
   const space = {
     margin: "10px",
   };
+
   return (
     <div style={style}>
       <div style={space}>
@@ -154,3 +171,5 @@ function ButtoGrid({ removeSelected, addRow }) {
     </div>
   );
 }
+
+export default Table;
