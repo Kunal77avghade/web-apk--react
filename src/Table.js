@@ -3,8 +3,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import axios from "axios";
-// import { Grid } from "ag-grid-community";
 import { Button, Grid } from "@mui/material";
+
+const createNewRow = () => {
+  return {
+    start: new Date().getDate(),
+    end: new Date().getDate(),
+    ammount: 0,
+    comment: "",
+  };
+};
 
 export function Table() {
   const gridRef = useRef();
@@ -13,7 +21,7 @@ export function Table() {
 
   useEffect(() => {
     getData();
-  }, []);
+  });
 
   const getData = () => {
     axios.get(url).then((res) => {
@@ -83,6 +91,7 @@ export function Table() {
   };
   return (
     <div style={style}>
+      <ButtoGrid />
       <div
         className="ag-theme-alpine"
         style={{ height: "400px", borderRadius: "100px" }}
@@ -97,11 +106,38 @@ export function Table() {
         />
       </div>
 
-      <Grid align="right">
+      <Grid align="right" padding="1rem">
         <Button variant="contained" color="primary" onClick={handleSubmit}>
           Submit
         </Button>
       </Grid>
+    </div>
+  );
+}
+
+function ButtoGrid() {
+  const style = {
+    display: "flex",
+    align: "left",
+    justifyContent: "right",
+    margin: "2px",
+  };
+
+  const space = {
+    margin: "10px",
+  };
+  return (
+    <div style={style}>
+      <div style={space}>
+        <Button variant="contained" color="success">
+          Add Row
+        </Button>
+      </div>
+      <div style={space}>
+        <Button variant="contained" color="error">
+          Remove
+        </Button>
+      </div>
     </div>
   );
 }
