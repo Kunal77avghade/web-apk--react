@@ -1,14 +1,15 @@
 import { AgGridReact } from "ag-grid-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import axios from "axios";
+// import { Grid } from "ag-grid-community";
 import { Button, Grid } from "@mui/material";
 
 const createNewRow = () => {
   return {
-    start: new Date().getDate(),
-    end: new Date().getDate(),
+    start: new Date(),
+    end: new Date(),
     ammount: 0,
     comment: "",
   };
@@ -21,7 +22,23 @@ export function Table() {
 
   useEffect(() => {
     getData();
-  });
+  }, []);
+
+  const removeSelected = useCallback(() => {
+    const selectedData = gridRef.current.api.getSelectedRows();
+    // setTableData(tableData?.filter((row) => row !== selectedData));
+    const res = gridRef.current.api.applyTransaction({ remove: selectedData });
+    console.log(selectedData);
+    console.log("removed", res);
+  }, []);
+
+  const addRow = useCallback((idx = undefined) => {
+    const res = gridRef.current.api.applyTransaction({
+      add: [createNewRow()],
+      addIndex: idx,
+    });
+    console.log("added", res);
+  }, []);
 
   const getData = () => {
     axios.get(url).then((res) => {
@@ -58,17 +75,13 @@ export function Table() {
     };
   }, []);
 
-  const defaultColDef = useMemo(() => {
-    return {
-      flex: 1,
-      filter: true,
-
-      sortable: true,
-      resizable: true,
-      editable: true,
-    };
-  }, []);
-
+  const defaultColDef = {
+    flex: 1,
+    filter: true,
+    sortable: true,
+    resizable: true,
+    editable: true,
+  };
   const columnDefs = [
     { headerName: "Start", field: "start" },
     { headerName: "End", field: "end" },
@@ -84,14 +97,12 @@ export function Table() {
     marginTop: "3rem",
   };
 
-  console.log(gridRef);
-
   const handleSubmit = () => {
     console.log(tableData);
   };
   return (
     <div style={style}>
-      <ButtoGrid />
+      <ButtoGrid removeSelected={removeSelected} addRow={addRow} />
       <div
         className="ag-theme-alpine"
         style={{ height: "400px", borderRadius: "100px" }}
@@ -103,6 +114,8 @@ export function Table() {
           defaultColDef={defaultColDef}
           onGridReady={onGridReady}
           dataTypeDefinitions={dataTypeDefinitions}
+          rowSelection={"multiple"}
+          animateRows={true}
         />
       </div>
 
@@ -115,7 +128,7 @@ export function Table() {
   );
 }
 
-function ButtoGrid() {
+function ButtoGrid({ removeSelected, addRow }) {
   const style = {
     display: "flex",
     align: "left",
@@ -129,12 +142,12 @@ function ButtoGrid() {
   return (
     <div style={style}>
       <div style={space}>
-        <Button variant="contained" color="success">
+        <Button variant="contained" color="success" onClick={addRow}>
           Add Row
         </Button>
       </div>
       <div style={space}>
-        <Button variant="contained" color="error">
+        <Button variant="contained" color="error" onClick={removeSelected}>
           Remove
         </Button>
       </div>
