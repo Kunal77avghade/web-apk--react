@@ -28,6 +28,7 @@ export function Table() {
 
   useEffect(() => {
     getData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const removeSelected = useCallback(() => {
@@ -112,10 +113,20 @@ export function Table() {
     marginTop: "3rem",
   };
 
-  const handleSubmit = () => {
+  function handleSubmit() {
     const data = JSON.stringify(tableData);
-    axios.post(url + `saved`, data).then(console.log("submiteed", data));
-  };
+
+    axios
+      .post("http://localhost:8000/data", tableData)
+      .then((response) => {
+        console.log("Response:", response.data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+    console.log("asd");
+    axios.post(url + `saved`, tableData).then(console.log("submiteed", data));
+  }
 
   return (
     <div style={style}>
@@ -167,6 +178,8 @@ function ButtoGrid({ removeSelected, addRow }) {
         <Button variant="contained" color="error" onClick={removeSelected}>
           Remove
         </Button>
+
+        {/* <ContactUs /> */}
       </div>
     </div>
   );
