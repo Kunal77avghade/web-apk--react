@@ -39,7 +39,9 @@ app.post("/data", (req, res) => {
   data += "<tr><th>start</th><th>end</th><th>Ammount</th><th>Comment</th></tr>";
 
   message.forEach((i) => {
-    data += `<tr><td>${i.start}</td><td>${i.end}</td><td>${i.ammount}</td><td>${i.comment}</td></tr>`;
+    data += `<tr><td>${i.start.split("T")[0]}</td><td>${
+      i.end.split("T")[0]
+    }</td><td>${i.ammount}</td><td>${i.comment}</td></tr>`;
   });
 
   data += "</table>";
@@ -47,7 +49,7 @@ app.post("/data", (req, res) => {
     from: "kunal77avghade@gmail.com",
     to: email,
     subject: subject,
-    html: `Hi there please find the data <br/>${data}`,
+    html: `<h2>Hi there please find Invoice details </h2> <br/>${data}`,
   };
 
   transponder.sendMail(mailoptions, (error, info) => {
