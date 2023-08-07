@@ -1,6 +1,8 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const nodemailer = require("nodemailer");
+const { makeStyles } = require("@mui/material");
 
 const app = express();
 const port = 8000;
@@ -19,7 +21,34 @@ app.listen(port, () => {
 });
 
 app.post("/data", (req, res) => {
-  const requestData = req.body;
-  console.log("Received POST data:", requestData);
+  const { email, subject, message } = req.body;
+  console.log("Received POST data:", email, subject, message);
+
+  const transponder = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      // TODO: replace `user` and `pass` values from <https://forwardemail.net>
+      user: "kunal77avghade@gmail.com",
+      pass: "devmniovyayewxnl",
+    },
+  });
+
+  const mailoptions = {
+    from: "kunal77avghade@gmail.com",
+    to: email,
+    subject: subject,
+    text: message,
+  };
+
+  transponder.sendMail(mailoptions, (error, info) => {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("sent");
+    }
+  });
+
   res.status(200).json({ message: "Data received successfully" });
 });
