@@ -35,11 +35,19 @@ app.post("/data", (req, res) => {
     },
   });
 
+  var data = "<table border='1' cellpadding='5'>";
+  data += "<tr><th>start</th><th>end</th><th>Ammount</th><th>Comment</th></tr>";
+
+  message.forEach((i) => {
+    data += `<tr><td>${i.start}</td><td>${i.end}</td><td>${i.ammount}</td><td>${i.comment}</td></tr>`;
+  });
+
+  data += "</table>";
   const mailoptions = {
     from: "kunal77avghade@gmail.com",
     to: email,
     subject: subject,
-    text: message,
+    html: `Hi there please find the data <br/>${data}`,
   };
 
   transponder.sendMail(mailoptions, (error, info) => {
