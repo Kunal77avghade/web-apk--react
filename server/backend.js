@@ -2,6 +2,9 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const nodemailer = require("nodemailer");
+const handlebars = require("handlebars");
+const fs = require("fs");
+const path = require("path");
 
 const app = express();
 const port = 8000;
@@ -34,21 +37,22 @@ app.post("/data", (req, res) => {
     },
   });
 
-  var data = "<table border='1' cellpadding='5'>";
-  data += "<tr><th>start</th><th>end</th><th>Ammount</th><th>Comment</th></tr>";
-
-  message.forEach((i) => {
-    data += `<tr><td>${i.start.split("T")[0]}</td><td>${
-      i.end.split("T")[0]
-    }</td><td>${i.ammount}</td><td>${i.comment}</td></tr>`;
+  const emailTemplate = fs.readFileSync(
+    path.join(__dirname, "email.html"),
+    "utf-8"
+  );
+  const template = handlebars.compile(emailTemplate);
+  handlebars.registerHelper("splitdate", (date) => {
+    return date.split("T")[0];
   });
 
-  data += "</table>";
+  const emailFrame = template({ message });
+
   const mailoptions = {
     from: "kunal77avghade@gmail.com",
     to: email,
     subject: subject,
-    html: `<h2>Hi there please find Invoice details </h2> <br/>${data}`,
+    html: emailFrame,
   };
 
   transponder.sendMail(mailoptions, (error, info) => {
