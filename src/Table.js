@@ -11,6 +11,7 @@ import "ag-grid-community/styles/ag-theme-alpine.css";
 import axios from "axios";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
+import { TextField } from "@mui/material";
 
 const createNewRow = () => {
   return {
@@ -24,6 +25,8 @@ const createNewRow = () => {
 export function Table() {
   const gridRef = useRef();
   const [tableData, setTableData] = useState([]);
+  const [gridApi, setGridApi] = useState(null);
+  const [email, setEmail] = useState("");
   const url = `http://localhost:4000/`;
 
   useEffect(() => {
@@ -105,7 +108,9 @@ export function Table() {
     { headerName: "Comment", field: "comment" },
   ];
 
-  const onGridReady = (params) => {};
+  const onGridReady = (params) => {
+    setGridApi(params.api);
+  };
 
   const style = {
     width: "80%",
@@ -116,16 +121,29 @@ export function Table() {
   function handleSubmit() {
     const data = JSON.stringify(tableData);
 
+    const mail = {
+      email: email,
+      subject: "Invoice Details",
+      message: tableData,
+    };
+
     axios
-      .post("http://localhost:8000/data", tableData)
+      .post("http://localhost:8000/data", mail)
       .then((response) => {
         console.log("Response:", response.data);
       })
       .catch((error) => {
         console.error("Error:", error);
       });
-    console.log("asd");
-    axios.post(url + `saved`, tableData).then(console.log("submiteed", data));
+
+    axios
+      .post(url + `saved`, tableData)
+      .then(() => {
+        console.log("Submitted", data);
+      })
+      .catch((error) => {
+        console.error("Error submitting:", error);
+      });
   }
 
   return (
@@ -146,6 +164,14 @@ export function Table() {
           animateRows={true}
         />
       </div>
+      <Grid align="right" padding="1rem">
+        <TextField
+          id="standard-basic"
+          label="Email"
+          variant="standard"
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      </Grid>
       <Grid align="right" padding="1rem">
         <Button variant="contained" color="primary" onClick={handleSubmit}>
           Submit
