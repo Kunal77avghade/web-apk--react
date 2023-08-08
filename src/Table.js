@@ -146,6 +146,17 @@ export function Table() {
       });
   }
 
+  function onCellValueChanged(e) {
+    const start = e.data.start;
+    const end = e.data.end;
+    if (start > end) {
+      const newEnd = new Date(start);
+      e.node.setDataValue("end", newEnd);
+      gridApi.stopEditing();
+      gridApi.flashCells({ rowNodes: [e.node], flashDelay: 1000 });
+    }
+  }
+
   return (
     <div style={style}>
       <ButtoGrid removeSelected={removeSelected} addRow={addRow} />
@@ -162,6 +173,7 @@ export function Table() {
           dataTypeDefinitions={dataTypeDefinitions}
           rowSelection={"single"}
           animateRows={true}
+          onCellValueChanged={onCellValueChanged}
         />
       </div>
       <Grid align="right" padding="1rem">
