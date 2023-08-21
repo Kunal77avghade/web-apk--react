@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
@@ -22,7 +16,7 @@ const createNewRow = () => {
   };
 };
 
-export function Table() {
+export function Table({ dispatch }) {
   const gridRef = useRef();
   const [tableData, setTableData] = useState([]);
   const [gridApi, setGridApi] = useState(null);
@@ -34,6 +28,7 @@ export function Table() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /*
   const removeSelected = useCallback(() => {
     const selectedData = gridRef.current.api.getSelectedRows();
     try {
@@ -43,7 +38,9 @@ export function Table() {
       console.error("Error while removing rows:", error);
     }
   }, [tableData]);
+*/
 
+  /*
   const addRow = useCallback(
     (idx = undefined) => {
       const newRow = createNewRow();
@@ -57,6 +54,17 @@ export function Table() {
     },
     [tableData]
   );
+  */
+  const addRow = () => {
+    const newRow = createNewRow();
+    gridRef.current.api.applyTransaction({ add: [newRow] });
+    // console.log(tableData);
+  };
+
+  const removeSelected = () => {
+    const selected = gridRef.current.api.getSelectedRows();
+    gridRef.current.api.applyTransaction({ remove: selected });
+  };
 
   const getData = () => {
     axios.get(url + `data`).then((res) => {
@@ -80,6 +88,58 @@ export function Table() {
       setTableData(data2);
     });
   };
+
+  const onGridReady = (params) => {
+    console.log(params);
+    setGridApi(params.api);
+  };
+
+  function handleSubmit() {
+    let data = [];
+    gridRef.current.api.forEachNode((node) => data.push(node.data));
+
+    const mail = {
+      email: email,
+      subject: "Invoice Details",
+      message: data,
+    };
+
+    let errorStatus = false;
+    axios
+      .post("http://localhost:8000/data", mail)
+      .then((response) => {
+        console.log("Response:", response.data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        errorStatus = true;
+      });
+
+    axios
+      .post(url + `saved`, tableData)
+      .then(() => {
+        // console.log("Submitted", data);
+      })
+      .catch((error) => {
+        // console.error("Error submitting:", error);
+        errorStatus = true;
+      });
+    if (!errorStatus) dispatch({ type: "show_message", email: email });
+    else {
+      dispatch({ type: "show_error" });
+    }
+  }
+
+  function onCellValueChanged(e) {
+    const start = e.data.start;
+    const end = e.data.end;
+    if (start > end) {
+      const newEnd = new Date(start);
+      e.node.setDataValue("end", newEnd);
+      gridApi.stopEditing();
+      gridApi.flashCells({ rowNodes: [e.node], flashDelay: 1000 });
+    }
+  }
 
   const dataTypeDefinitions = useMemo(() => {
     return {
@@ -108,54 +168,11 @@ export function Table() {
     { headerName: "Comment", field: "comment" },
   ];
 
-  const onGridReady = (params) => {
-    setGridApi(params.api);
-  };
-
   const style = {
     width: "80%",
     margin: "10%",
     marginTop: "3rem",
   };
-
-  function handleSubmit() {
-    const data = JSON.stringify(tableData);
-
-    const mail = {
-      email: email,
-      subject: "Invoice Details",
-      message: tableData,
-    };
-
-    axios
-      .post("http://localhost:8000/data", mail)
-      .then((response) => {
-        console.log("Response:", response.data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-
-    axios
-      .post(url + `saved`, tableData)
-      .then(() => {
-        console.log("Submitted", data);
-      })
-      .catch((error) => {
-        console.error("Error submitting:", error);
-      });
-  }
-
-  function onCellValueChanged(e) {
-    const start = e.data.start;
-    const end = e.data.end;
-    if (start > end) {
-      const newEnd = new Date(start);
-      e.node.setDataValue("end", newEnd);
-      gridApi.stopEditing();
-      gridApi.flashCells({ rowNodes: [e.node], flashDelay: 1000 });
-    }
-  }
 
   return (
     <div style={style}>
@@ -171,7 +188,7 @@ export function Table() {
           defaultColDef={defaultColDef}
           onGridReady={onGridReady}
           dataTypeDefinitions={dataTypeDefinitions}
-          rowSelection={"single"}
+          rowSelection={"multiple"}
           animateRows={true}
           onCellValueChanged={onCellValueChanged}
         />
@@ -216,8 +233,6 @@ function ButtoGrid({ removeSelected, addRow }) {
         <Button variant="contained" color="error" onClick={removeSelected}>
           Remove
         </Button>
-
-        {/* <ContactUs /> */}
       </div>
     </div>
   );
