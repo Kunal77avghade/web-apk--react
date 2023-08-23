@@ -1,11 +1,12 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import axios from "axios";
 import Button from "@mui/material/Button";
-import Grid from "@mui/material/Grid";
-import { TextField } from "@mui/material";
+// import Grid from "@mui/material/Grid";
+// import { TextField } from "@mui/material";
+import VendorForm from "./Form";
 
 const createNewRow = () => {
   return {
@@ -18,16 +19,15 @@ const createNewRow = () => {
 
 export function Table({ dispatch }) {
   const gridRef = useRef();
-  const [tableData, setTableData] = useState([]);
+  const [tableData] = useState([]);
   const [gridApi, setGridApi] = useState(null);
-  const [email, setEmail] = useState("");
-  const url = `http://localhost:4000/`;
+  // const url = `http://localhost:4000/`;
 
-  useEffect(() => {
+  /*useEffect(() => {
     getData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
+*/
   /*
   const removeSelected = useCallback(() => {
     const selectedData = gridRef.current.api.getSelectedRows();
@@ -66,6 +66,7 @@ export function Table({ dispatch }) {
     gridRef.current.api.applyTransaction({ remove: selected });
   };
 
+  /*
   const getData = () => {
     axios.get(url + `data`).then((res) => {
       const data2 = res.data.map((row) => {
@@ -88,33 +89,48 @@ export function Table({ dispatch }) {
       setTableData(data2);
     });
   };
-
+*/
   const onGridReady = (params) => {
     console.log(params);
     setGridApi(params.api);
   };
 
-  function handleSubmit() {
+  function handleSubmit(info) {
     let data = [];
     gridRef.current.api.forEachNode((node) => data.push(node.data));
 
     const mail = {
-      email: email,
+      email: info.email,
       subject: "Invoice Details",
       message: data,
+      selectedDate: info.selectedDate,
+      vendorName: info.vendorName,
     };
 
-    let errorStatus = false;
+    console.log(mail);
+
+    // // axios
+    // //   .post("http://localhost:8000/data", mail)
+    // //   .then((response) => {
+    // //     console.log("Response:", response.data);
+    // //   })
+    // //   .catch((error) => {
+    // //     console.error("Error:", error);
+    // //     errorStatus = true;
+    // //   });
+
     axios
-      .post("http://localhost:8000/data", mail)
+      .post("http://localhost:5000/data", mail)
       .then((response) => {
         console.log("Response:", response.data);
+        dispatch({ type: "show_message", email: info.email });
       })
       .catch((error) => {
         console.error("Error:", error);
-        errorStatus = true;
+        dispatch({ type: "show_error" });
       });
 
+    /*
     axios
       .post(url + `saved`, tableData)
       .then(() => {
@@ -124,10 +140,7 @@ export function Table({ dispatch }) {
         // console.error("Error submitting:", error);
         errorStatus = true;
       });
-    if (!errorStatus) dispatch({ type: "show_message", email: email });
-    else {
-      dispatch({ type: "show_error" });
-    }
+    */
   }
 
   function onCellValueChanged(e) {
@@ -179,7 +192,7 @@ export function Table({ dispatch }) {
       <ButtoGrid removeSelected={removeSelected} addRow={addRow} />
       <div
         className="ag-theme-alpine"
-        style={{ height: "400px", borderRadius: "100px" }}
+        style={{ height: "400px", borderRadius: "100px", marginBottom: "1rem" }}
       >
         <AgGridReact
           ref={gridRef}
@@ -193,19 +206,7 @@ export function Table({ dispatch }) {
           onCellValueChanged={onCellValueChanged}
         />
       </div>
-      <Grid align="right" padding="1rem">
-        <TextField
-          id="standard-basic"
-          label="Email"
-          variant="standard"
-          onChange={(e) => setEmail(e.target.value)}
-        />
-      </Grid>
-      <Grid align="right" padding="1rem">
-        <Button variant="contained" color="primary" onClick={handleSubmit}>
-          Submit
-        </Button>
-      </Grid>
+      <VendorForm onSubmit={handleSubmit} />
     </div>
   );
 }

@@ -11,7 +11,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 //   return <Slide direction="up" ref={ref} {...props} />;
 // });
 
-export default function AlertDialogSlide({ state, dispatch }) {
+function AlertDialogSlide({ state, dispatch }) {
   function close() {
     dispatch({ type: "close_dialoag" });
     console.log(state);
@@ -45,3 +45,5 @@ export default function AlertDialogSlide({ state, dispatch }) {
     </div>
   );
 }
+
+export default AlertDialogSlide;
