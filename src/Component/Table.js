@@ -4,8 +4,6 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import axios from "axios";
 import Button from "@mui/material/Button";
-// import Grid from "@mui/material/Grid";
-// import { TextField } from "@mui/material";
 import VendorForm from "./Form";
 
 const createNewRow = () => {
@@ -21,44 +19,10 @@ export function Table({ dispatch }) {
   const gridRef = useRef();
   const [tableData] = useState([]);
   const [gridApi, setGridApi] = useState(null);
-  // const url = `http://localhost:4000/`;
 
-  /*useEffect(() => {
-    getData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-*/
-  /*
-  const removeSelected = useCallback(() => {
-    const selectedData = gridRef.current.api.getSelectedRows();
-    try {
-      const newData = [...tableData];
-      setTableData(newData.filter((row) => row !== selectedData[0]));
-    } catch (error) {
-      console.error("Error while removing rows:", error);
-    }
-  }, [tableData]);
-*/
-
-  /*
-  const addRow = useCallback(
-    (idx = undefined) => {
-      const newRow = createNewRow();
-      const newData = [...tableData];
-      if (idx !== undefined) {
-        newData.splice(idx, 0, newRow);
-      } else {
-        newData.push(newRow);
-      }
-      setTableData(newData);
-    },
-    [tableData]
-  );
-  */
   const addRow = () => {
     const newRow = createNewRow();
     gridRef.current.api.applyTransaction({ add: [newRow] });
-    // console.log(tableData);
   };
 
   const removeSelected = () => {
@@ -96,9 +60,13 @@ export function Table({ dispatch }) {
   };
 
   function handleSubmit(info) {
+    dispatch({ type: "loading" });
     let data = [];
     gridRef.current.api.forEachNode((node) => data.push(node.data));
-
+    if (data.length < 1) {
+      dispatch({ type: "show_error", message: "Data cannot be empty" });
+      return;
+    }
     const mail = {
       email: info.email,
       subject: "Invoice Details",
@@ -108,16 +76,6 @@ export function Table({ dispatch }) {
     };
 
     console.log(mail);
-
-    // // axios
-    // //   .post("http://localhost:8000/data", mail)
-    // //   .then((response) => {
-    // //     console.log("Response:", response.data);
-    // //   })
-    // //   .catch((error) => {
-    // //     console.error("Error:", error);
-    // //     errorStatus = true;
-    // //   });
 
     axios
       .post("http://localhost:5000/data", mail)
@@ -129,18 +87,6 @@ export function Table({ dispatch }) {
         console.error("Error:", error);
         dispatch({ type: "show_error" });
       });
-
-    /*
-    axios
-      .post(url + `saved`, tableData)
-      .then(() => {
-        // console.log("Submitted", data);
-      })
-      .catch((error) => {
-        // console.error("Error submitting:", error);
-        errorStatus = true;
-      });
-    */
   }
 
   function onCellValueChanged(e) {

@@ -21,33 +21,35 @@ const DataTable = ({
   rowsPerPage,
   handleChangePage,
   handleChangeRowsPerPage,
+  dispatch,
 }) => {
   async function download(id) {
-    console.log(id);
-    const response = await axios.get(`http://localhost:5000/${id}`);
-    console.log(response.data.vendor);
+    try {
+      dispatch({ type: "loading" });
+      const response = await axios.get(`http://localhost:5000/${id}`);
+      const row = response.data.details.map((i) => [
+        i.start.split("T")[0],
+        i.end.split("T")[0],
+        i.ammount,
+        i.comment,
+      ]);
 
-    const row = response.data.details.map((i) => [
-      i.start.split("T")[0],
-      i.end.split("T")[0],
-      i.ammount,
-      i.comment,
-    ]);
-
-    const csvHeader = ["Start", "End", "Ammout", "Commnet"];
-    const csvContent = `vendor, ${
-      response.data.vendor
-    }\n${csvHeader}\n${row.join("\n")}`;
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
-
-    saveAs(blob, `${id}_Report.csv`);
+      const csvHeader = ["Start", "End", "Ammout", "Commnet"];
+      const csvContent = `vendor, ${
+        response.data.vendor
+      }\n${csvHeader}\n${row.join("\n")}`;
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
+      saveAs(blob, `${id}_Report.csv`);
+      dispatch({ type: "loading_off" });
+    } catch (e) {
+      dispatch({ type: "show_error" });
+    }
   }
 
   async function deleteReq(id) {
     try {
-      const response = await axios.delete(`http://localhost:5000/${id}`);
-      console.log(response.data.vendor);
+      await axios.delete(`http://localhost:5000/${id}`);
+      window.location.reload();
     } catch (e) {
       console.log(e);
     }

@@ -9,12 +9,9 @@ function Header() {
     fontSize: "30px",
   };
   return (
-    <>
-      <div style={style}>
-        <LogoIcon />
-      </div>
-      <h1>Invoice details</h1>
-    </>
+    <div style={style}>
+      <LogoIcon />
+    </div>
   );
 }
 
