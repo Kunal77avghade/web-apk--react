@@ -6,11 +6,14 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { CircularProgress } from "@mui/material";
+import { useDialog } from "../Context/DialogContext";
 
-function AlertDialogSlide({ state, dispatch }) {
+function AlertDialogSlide() {
+  const { state, dispatch } = useDialog();
+
   function close() {
     dispatch({ type: "close_dialoag" });
-    console.log(state);
+    // console.log(state);
   }
   return (
     <div>

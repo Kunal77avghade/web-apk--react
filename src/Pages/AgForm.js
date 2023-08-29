@@ -2,14 +2,17 @@ import Footer from "../Component/Footer";
 import Header from "../Component/Header";
 import AlertDialogSlide from "../Component/Dialog";
 import Table from "../Component/Table";
+import { DialogContextProvider } from "../Context/DialogContext";
 
-function AgForm({ state, dispatch }) {
+function AgForm() {
   return (
     <div className="App">
       <Header />
-      <h1 style={{ textAlign: "center" }}>Invoice Details</h1>
-      <Table dispatch={dispatch} />
-      <AlertDialogSlide state={state} dispatch={dispatch} />
+      <DialogContextProvider>
+        <h1 style={{ textAlign: "center" }}>Invoice Details</h1>
+        <Table />
+        <AlertDialogSlide />
+      </DialogContextProvider>
       <Footer />
     </div>
   );

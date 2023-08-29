@@ -2,8 +2,11 @@ import Footer from "../Component/Footer";
 import VendorForm from "../Component/Form";
 import Header from "../Component/Header";
 import axios from "axios";
+import { useDialog } from "../Context/DialogContext";
+import AlertDialogSlide from "../Component/Dialog";
 
 function SendMail() {
+  const { dispatch } = useDialog();
   const style = {
     width: "80%",
     margin: "10%",
@@ -11,16 +14,17 @@ function SendMail() {
   };
 
   async function sendmailtovendor(mail) {
+    dispatch({ type: "loading" });
+    // console.log("called");
     try {
-      const data = await axios.post("http://localhost:5000/sendmail", {
+      await axios.post("http://localhost:5000/sendmail", {
         ...mail,
         subject: "remainder",
       });
-      console.log(data);
+      dispatch({ type: "show_message", email: mail.email });
     } catch (e) {
-      console.log(e);
+      dispatch({ type: "show_error" });
     }
-    console.log(mail);
   }
 
   return (
@@ -30,6 +34,7 @@ function SendMail() {
       <div style={style}>
         <VendorForm onSubmit={sendmailtovendor} />
       </div>
+      <AlertDialogSlide />
       <Footer />
     </div>
   );

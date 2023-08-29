@@ -5,12 +5,11 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import { useSearchParams } from "react-router-dom";
-// import dayjs from "dayjs";
 
 function VendorForm({ onSubmit }) {
   const [vendorName, setVendorName] = useState("");
   const [email, setEmail] = useState("");
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState();
 
   const [searchParams] = useSearchParams();
 
@@ -19,6 +18,7 @@ function VendorForm({ onSubmit }) {
     const email = searchParams.get("email");
     if (email) setEmail(email);
     if (name) setVendorName(name);
+    setSelectedDate("");
   }, [searchParams]);
 
   const handleDateChange = (date) => {
@@ -64,9 +64,9 @@ function VendorForm({ onSubmit }) {
               <DatePicker
                 label="Select Month"
                 views={["year", "month"]}
-                value={selectedDate}
+                // value={selectedDate}
                 onChange={handleDateChange}
-                renderInput={(params) => <TextField {...params} />}
+                textField={(params) => <TextField {...params} />}
               />
             </LocalizationProvider>
           </Grid>

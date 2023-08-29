@@ -8,8 +8,9 @@ import AlertDialogSlide from "../Component/Dialog";
 import DownloadIcon from "@mui/icons-material/Download";
 import { saveAs } from "file-saver";
 import { Delete } from "@mui/icons-material";
+import { DialogContextProvider, useDialog } from "../Context/DialogContext";
 
-const Admin = ({ state, dispatch }) => {
+const Admin = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [sampleData, setSampleData] = useState([]);
@@ -17,7 +18,7 @@ const Admin = ({ state, dispatch }) => {
   useEffect(() => {
     async function getAll() {
       const response = await axios.get("http://localhost:5000/");
-      console.log(response.data);
+      // console.log(response.data);
       setSampleData(response.data);
     }
     getAll();
@@ -41,19 +42,20 @@ const Admin = ({ state, dispatch }) => {
   return (
     <>
       <Header />
-      <div style={style}>
-        <h1 style={{ textAlign: "center" }}>Dashboard</h1>
-        <DataTable
-          data={sampleData}
-          page={page}
-          rowsPerPage={rowsPerPage}
-          handleChangePage={handleChangePage}
-          handleChangeRowsPerPage={handleChangeRowsPerPage}
-          dispatch={dispatch}
-        />
-        <ButtoGrid dispatch={dispatch} />
-      </div>
-      <AlertDialogSlide state={state} dispatch={dispatch} />
+      <DialogContextProvider>
+        <div style={style}>
+          <h1 style={{ textAlign: "center" }}>Dashboard</h1>
+          <DataTable
+            data={sampleData}
+            page={page}
+            rowsPerPage={rowsPerPage}
+            handleChangePage={handleChangePage}
+            handleChangeRowsPerPage={handleChangeRowsPerPage}
+          />
+          <ButtoGrid />
+        </div>
+        <AlertDialogSlide />
+      </DialogContextProvider>
       <Footer />
     </>
   );
@@ -61,7 +63,8 @@ const Admin = ({ state, dispatch }) => {
 
 export default Admin;
 
-function ButtoGrid({ state, dispatch }) {
+function ButtoGrid() {
+  const { dispatch } = useDialog();
   async function download() {
     try {
       dispatch({ type: "loading" });

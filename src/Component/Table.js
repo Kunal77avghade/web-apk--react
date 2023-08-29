@@ -5,6 +5,7 @@ import "ag-grid-community/styles/ag-theme-alpine.css";
 import axios from "axios";
 import Button from "@mui/material/Button";
 import VendorForm from "./Form";
+import { useDialog } from "../Context/DialogContext";
 
 const createNewRow = () => {
   return {
@@ -15,7 +16,9 @@ const createNewRow = () => {
   };
 };
 
-export function Table({ dispatch }) {
+export function Table() {
+  const { dispatch } = useDialog();
+
   const gridRef = useRef();
   const [tableData] = useState([]);
   const [gridApi, setGridApi] = useState(null);
@@ -55,7 +58,7 @@ export function Table({ dispatch }) {
   };
 */
   const onGridReady = (params) => {
-    console.log(params);
+    // console.log(params);
     setGridApi(params.api);
   };
 
@@ -75,16 +78,16 @@ export function Table({ dispatch }) {
       vendorName: info.vendorName,
     };
 
-    console.log(mail);
+    // console.log(mail);
 
     axios
       .post("http://localhost:5000/data", mail)
       .then((response) => {
-        console.log("Response:", response.data);
+        // console.log("Response:", response.data);
         dispatch({ type: "show_message", email: info.email });
       })
       .catch((error) => {
-        console.error("Error:", error);
+        // console.error("Error:", error);
         dispatch({ type: "show_error" });
       });
   }

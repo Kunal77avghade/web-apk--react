@@ -1,8 +1,8 @@
-import { createContext, useReducer } from "react";
+import { createContext, useContext, useReducer } from "react";
 
 const DialogContext = createContext(null);
 
-function DialogContextProvider({ children }) {
+export function DialogContextProvider({ children }) {
   const init = {
     message: "",
     title: "",
@@ -70,4 +70,17 @@ function DialogContextProvider({ children }) {
   };
 
   const [state, dispatch] = useReducer(reducer, init);
+  return (
+    <DialogContext.Provider value={{ state, dispatch }}>
+      {children}
+    </DialogContext.Provider>
+  );
+}
+export function useDialog() {
+  const context = useContext(DialogContext);
+  if (context === undefined)
+    throw new Error(
+      "DialogContext was used outside of the DialogContextProvider"
+    );
+  return context;
 }

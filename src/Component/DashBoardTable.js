@@ -14,6 +14,7 @@ import { Delete as DeleteIcon } from "@mui/icons-material";
 import DownloadIcon from "@mui/icons-material/Download";
 import { saveAs } from "file-saver";
 import axios from "axios";
+import { useDialog } from "../Context/DialogContext";
 
 const DataTable = ({
   data,
@@ -21,8 +22,9 @@ const DataTable = ({
   rowsPerPage,
   handleChangePage,
   handleChangeRowsPerPage,
-  dispatch,
 }) => {
+  const { dispatch } = useDialog();
+
   async function download(id) {
     try {
       dispatch({ type: "loading" });
