@@ -1,14 +1,25 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TextField, Button, Grid, Container } from "@mui/material";
 import "moment/locale/en-gb"; // or your preferred locale
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
+import { useSearchParams } from "react-router-dom";
+// import dayjs from "dayjs";
 
 function VendorForm({ onSubmit }) {
   const [vendorName, setVendorName] = useState("");
   const [email, setEmail] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
+
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const name = searchParams.get("name");
+    const email = searchParams.get("email");
+    if (email) setEmail(email);
+    if (name) setVendorName(name);
+  }, [searchParams]);
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
